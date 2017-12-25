@@ -10,17 +10,14 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".MainActivity">
+
+        </activity>
+        <activity android:name=".ListViewExampleActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity
-            android:name=".ListViewExample"
-            android:label="@string/title_activity_list_view_example"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".ListViewExampleActivity"></activity>
     </application>
 
 </manifest>
