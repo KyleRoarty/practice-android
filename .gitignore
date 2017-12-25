@@ -13,4 +13,5 @@ gen/
 .DS_Store
 /build
 /captures
+**/drawable*
 .externalNativeBuild

@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">KotlinTest</string>
     <string name="title_activity_list_view_example">ListViewExample</string>
+    <string name="title_activity_my_list">MyListActivity</string>
 </resources>
