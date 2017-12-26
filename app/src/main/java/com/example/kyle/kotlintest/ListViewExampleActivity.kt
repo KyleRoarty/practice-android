@@ -2,8 +2,11 @@ package com.example.kyle.kotlintest
 
 import android.content.Context
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.Toolbar
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ListView
@@ -12,9 +15,13 @@ class ListViewExampleActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_list_view_example2)
 
+        setContentView(R.layout.activity_list_view_example2)
         val lv = findViewById<ListView>(R.id.list_view)
+
+        val toolbarLayout = layoutInflater.inflate(R.layout.toolbar, findViewById<ViewGroup>(android.R.id.content))
+        val myToolbar = toolbarLayout.findViewById<Toolbar>(R.id.my_toolbar)
+        setSupportActionBar(myToolbar)
 
         val operating_systems = arrayListOf<String>("Android", "iPhone", "WindowsMobile", "Blackberry",
                                         "WebOS", "Ubuntu", "Windows7", "Max OS X", "Linux")
@@ -43,7 +50,7 @@ class ListViewExampleActivity : AppCompatActivity() {
 
     }
 
-    private class StableArrayAdapter(context: Context, resource: Int, objects: ArrayList<String>) : ArrayAdapter<String>(context, resource, objects) {
+    private class StableArrayAdapter(context: Context, resource: Int, objects: ArrayList<String>) : MySimpleArrayAdapter(context, objects) {
         val mIdMap = HashMap<String, Int>()
 
         init {

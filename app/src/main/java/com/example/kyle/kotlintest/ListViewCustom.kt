@@ -5,20 +5,19 @@ import android.content.Context
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.ListView
-import android.widget.Toast
+import android.widget.*
 
 class ListViewCustom : ListActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val myToolbar = findViewById<Toolbar>(R.id.my_toolbar)
+        setActionBar(myToolbar)
 
         val operating_systems = arrayListOf<String>("Android", "iPhone", "WindowsMobile", "Blackberry",
                                         "WebOS", "Ubuntu", "Windows7", "Max OS X", "Linux")
 
-        val adapter = MySimpleArrayAdapter(this, operating_systems)
+        val adapter = StableArrayAdapter(this, android.R.layout.simple_list_item_1, operating_systems)
         setListAdapter(adapter)
 
     }
@@ -29,7 +28,7 @@ class ListViewCustom : ListActivity() {
         Toast.makeText(this, "$item selected", Toast.LENGTH_LONG).show()
     }
 
-    private class StableArrayAdapter(context: Context, resource: Int, objects: ArrayList<String>) : ArrayAdapter<String>(context, resource, objects) {
+    private class StableArrayAdapter(context: Context, resource: Int, objects: ArrayList<String>) : MySimpleArrayAdapter(context, objects) {
         val mIdMap = HashMap<String, Int>()
 
         init {
