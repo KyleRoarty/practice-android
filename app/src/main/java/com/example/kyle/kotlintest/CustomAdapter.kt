@@ -49,7 +49,7 @@ open class MySimpleArrayAdapter2(val list: ArrayList<String>) :  RecyclerView.Ad
         list.removeAt(position)
         notifyItemRemoved(position)
         notifyItemRangeChanged(position, list.size)
-        //notifyDataSetChanged()
+        notifyDataSetChanged()
     }
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener{
