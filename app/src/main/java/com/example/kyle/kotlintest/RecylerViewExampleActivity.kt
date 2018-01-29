@@ -16,10 +16,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.*
-<<<<<<< Updated upstream
-=======
-import kotlinx.android.synthetic.main.alert_layout.*
->>>>>>> Stashed changes
 import java.util.zip.Inflater
 
 class RecylerViewExampleActivity : AppCompatActivity() {
@@ -76,7 +72,7 @@ class TestDialog : DialogFragment() {
 //            var name = username.text.toString()
 
             setPositiveButton("Hi!") { dialog, id ->
-                var name = view.findViewById<EditText>(R.id.username).text.toString()
+                var name = (dialog as AlertDialog).findViewById<EditText>(R.id.username).text.toString()
                 Toast.makeText(activity, "Hi, ${name}!", Toast.LENGTH_SHORT).show()
             }
             setNegativeButton("Bye") { dialog, id -> Toast.makeText(activity, "Bye", Toast.LENGTH_SHORT).show() }
