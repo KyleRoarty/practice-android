@@ -22,9 +22,9 @@ open class MySimpleArrayAdapter(context: Context, val values: ArrayList<String>)
         val s = values.get(position)
 
         if(s.startsWith("iPhone")){
-            imageView.setImageResource(R.drawable.no)
+            imageView.setImageResource(R.mipmap.no)
         } else {
-            imageView.setImageResource(R.drawable.ok)
+            imageView.setImageResource(R.mipmap.ok)
         }
         return rowView
     }
@@ -66,22 +66,23 @@ open class MySimpleArrayAdapter2(val list: ArrayList<String>) :  RecyclerView.Ad
             textView.setText(item)
 
             if(item.startsWith("iPhone")){
-                imageView.setImageResource(R.drawable.no)
+                imageView.setImageResource(R.mipmap.no)
                 text2View.setText("Nope")
             } else {
-                imageView.setImageResource(R.drawable.ok)
+                imageView.setImageResource(R.mipmap.ok)
                 text2View.setText("Yes")
             }
         }
 
         override fun onClick(p0: View) {
-            p0.animate().setDuration(1000).alpha(0f).withEndAction(
+            removeAt(adapterPosition)
+            /*p0.animate().setDuration(1000).alpha(0f).withEndAction(
                     object : Runnable {
                         override fun run() {
                             removeAt(adapterPosition)
                         }
                     }
-            )
+            )*/
         }
     }
 

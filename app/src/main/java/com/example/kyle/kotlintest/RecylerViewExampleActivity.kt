@@ -14,10 +14,7 @@ import android.support.v7.widget.Toolbar
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.ListView
-import android.widget.Toast
+import android.widget.*
 import java.util.zip.Inflater
 
 class RecylerViewExampleActivity : AppCompatActivity() {
@@ -67,8 +64,13 @@ class TestDialog : DialogFragment() {
         val builder = AlertDialog.Builder(activity)
 
         builder.setMessage("Hello, Dialog")
-               .setPositiveButton("Hi!"){ dialog, id -> Toast.makeText(activity, "Hi!", Toast.LENGTH_SHORT).show()}
-               .setNegativeButton("Bye"){ dialog, id -> Toast.makeText(activity, "Bye", Toast.LENGTH_SHORT).show()}
+               .setPositiveButton("Hi!"){ dialog, id ->
+                   var name = view.findViewById<EditText>(R.id.username).text.toString()
+                   Toast.makeText(activity, "Hi!", Toast.LENGTH_SHORT).show()
+               }
+               .setNegativeButton("Bye"){ dialog, id ->
+                   Toast.makeText(activity, "Bye", Toast.LENGTH_SHORT).show()
+               }
 
         return builder.create()
     }
