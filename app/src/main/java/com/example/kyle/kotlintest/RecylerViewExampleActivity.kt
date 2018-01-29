@@ -11,10 +11,15 @@ import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.support.v7.widget.Toolbar
+import android.text.InputType
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.*
+<<<<<<< Updated upstream
+=======
+import kotlinx.android.synthetic.main.alert_layout.*
+>>>>>>> Stashed changes
 import java.util.zip.Inflater
 
 class RecylerViewExampleActivity : AppCompatActivity() {
@@ -63,15 +68,19 @@ class TestDialog : DialogFragment() {
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val builder = AlertDialog.Builder(activity)
 
-        builder.setMessage("Hello, Dialog")
-               .setPositiveButton("Hi!"){ dialog, id ->
-                   var name = view.findViewById<EditText>(R.id.username).text.toString()
-                   Toast.makeText(activity, "Hi!", Toast.LENGTH_SHORT).show()
-               }
-               .setNegativeButton("Bye"){ dialog, id ->
-                   Toast.makeText(activity, "Bye", Toast.LENGTH_SHORT).show()
-               }
+        with(builder) {
 
+            setMessage("Hello, Dialog")
+            setView(R.layout.alert_layout)
+
+//            var name = username.text.toString()
+
+            setPositiveButton("Hi!") { dialog, id ->
+                var name = view.findViewById<EditText>(R.id.username).text.toString()
+                Toast.makeText(activity, "Hi, ${name}!", Toast.LENGTH_SHORT).show()
+            }
+            setNegativeButton("Bye") { dialog, id -> Toast.makeText(activity, "Bye", Toast.LENGTH_SHORT).show() }
+        }
         return builder.create()
     }
 }
