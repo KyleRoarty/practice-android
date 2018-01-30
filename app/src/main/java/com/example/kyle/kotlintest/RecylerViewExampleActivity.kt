@@ -16,14 +16,20 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.*
+import kotlinx.android.synthetic.main.activity_recycler_view.*
+import kotlinx.android.synthetic.main.alert_layout.*
+import java.io.Serializable
 import java.util.zip.Inflater
 
-class RecylerViewExampleActivity : AppCompatActivity() {
+class RecylerViewExampleActivity : AppCompatActivity(), TestDialog.OnInputData {
+    val rv by lazy {
+        findViewById<RecyclerView>(R.id.recycler_view)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_recycler_view)
-        val rv = findViewById<RecyclerView>(R.id.recycler_view)
+        //rv = findViewById<RecyclerView>(R.id.recycler_view)
         val toolbar = findViewById<Toolbar>(R.id.inc_toolbar)
         setSupportActionBar(toolbar)
 
@@ -33,7 +39,6 @@ class RecylerViewExampleActivity : AppCompatActivity() {
                 "WebOS", "Ubuntu", "Windows7", "Max OS X", "Linux")
 
         val adapter = MySimpleArrayAdapter2(operating_systems)
-
         rv.adapter = adapter
         rv.layoutManager = LinearLayoutManager(this)
     }
@@ -58,9 +63,18 @@ class RecylerViewExampleActivity : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
 
     }
+
+    override fun onInput(name: String) {
+        (rv.adapter as MySimpleArrayAdapter2).add(name)
+    }
 }
 
 class TestDialog : DialogFragment() {
+
+    interface OnInputData{
+        fun onInput(name: String)
+    }
+
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val builder = AlertDialog.Builder(activity)
 
@@ -72,11 +86,17 @@ class TestDialog : DialogFragment() {
 //            var name = username.text.toString()
 
             setPositiveButton("Hi!") { dialog, id ->
-                var name = (dialog as AlertDialog).findViewById<EditText>(R.id.username).text.toString()
+                val name = (dialog as AlertDialog).findViewById<EditText>(R.id.username).text.toString()
+                val mCallback = activity as OnInputData
+                mCallback.onInput(name)
                 Toast.makeText(activity, "Hi, ${name}!", Toast.LENGTH_SHORT).show()
+
+
             }
             setNegativeButton("Bye") { dialog, id -> Toast.makeText(activity, "Bye", Toast.LENGTH_SHORT).show() }
         }
         return builder.create()
     }
 }
+
+

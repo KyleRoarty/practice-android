@@ -52,6 +52,11 @@ open class MySimpleArrayAdapter2(val list: ArrayList<String>) :  RecyclerView.Ad
         notifyDataSetChanged()
     }
 
+    fun add(item: String){
+        list.add(item)
+        notifyDataSetChanged()
+    }
+
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView), View.OnClickListener{
         val textView = itemView.findViewById<TextView>(R.id.firstLine)
         val text2View = itemView.findViewById<TextView>(R.id.secondLine)
@@ -85,7 +90,4 @@ open class MySimpleArrayAdapter2(val list: ArrayList<String>) :  RecyclerView.Ad
             )*/
         }
     }
-
-
-
 }
