@@ -1,6 +1,11 @@
 package com.example.kyle.kotlintest
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Rect
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
+import android.graphics.drawable.ScaleDrawable
 import android.os.AsyncTask
 import android.os.Bundle
 import android.os.PersistableBundle
@@ -19,19 +24,14 @@ class DownloadActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.imagelayout)
-        img.setImageDrawable(AsyncDownload().execute().get())
+        val bm = AsyncDownload().execute().get()
+        img.setImageBitmap(bm)
     }
 
-    inner class AsyncDownload : AsyncTask<String, String, Drawable>(){
-        override fun doInBackground(vararg p0: String?): Drawable {
+    inner class AsyncDownload : AsyncTask<String, String, Bitmap>(){
+        override fun doInBackground(vararg p0: String?): Bitmap {
             val im_stream = URL("http://services.swpc.noaa.gov/images/aurora-forecast-northern-hemisphere.jpg").content
-            val d = Drawable.createFromStream(im_stream as InputStream, "src name")
-            return d
+            return BitmapFactory.decodeStream(im_stream as InputStream)
         }
-
-        /*override fun onPostExecute(result: Drawable?) {
-            img.setImageDrawable(result)
-            super.onPostExecute(result)
-        }*/
     }
 }
