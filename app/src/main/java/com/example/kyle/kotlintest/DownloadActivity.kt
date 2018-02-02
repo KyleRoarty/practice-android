@@ -52,17 +52,25 @@ class DownloadActivity : AppCompatActivity() {
 
 
     inner class ScaleListener : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+        lateinit var initPoint: PointF
+        lateinit var currPoint: PointF
+
+        override fun onScaleBegin(detector: ScaleGestureDetector): Boolean {
+            initPoint = PointF(detector.focusX, detector.focusY)
+            return super.onScaleBegin(detector)
+        }
 
         override fun onScale(detector: ScaleGestureDetector): Boolean {
-            Log.v("IMAGE", "In onScale")
-            mScaleFactor *= detector.getScaleFactor()
+            initPoint = PointF()
+            currPoint = PointF(detector.focusX, detector.focusY)
+            /*mScaleFactor *= detector.getScaleFactor()
             mScaleFactor = maxOf(0.1f, minOf(mScaleFactor, 10f))
-            Log.v("IMAGE", "scale factor: " + mScaleFactor)
-
+            Log.v("IMAGE", "scale factor: " + mScaleFactor)*/
             val newMatrix = Matrix()
 
             val mp = PointF((detector.currentSpanX+detector.previousSpanX)/2, (detector.currentSpanY+detector.previousSpanY)/2)
-            newMatrix.postScale(mScaleFactor, mScaleFactor)
+            val middleImage = PointF((initPoint.x+currPoint.x)/2, (initPoint.y+currPoint.y)/2)
+            newMatrix.postScale(currPoint.length()/initPoint.length(), currPoint.length()/initPoint.length(), middleImage.x, middleImage.y)
             img.imageMatrix = newMatrix
 
             return super.onScale(detector)
