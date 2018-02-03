@@ -22,6 +22,10 @@
         </activity>
 
         <activity android:name=".DownloadActivity">
+
+        </activity>
+
+        <activity android:name=".ImageVid">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
