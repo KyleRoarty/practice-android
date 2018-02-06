@@ -4,11 +4,6 @@ import com.beust.klaxon.Parser
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.*
-import android.graphics.drawable.DrawableContainer.DrawableContainerState
-import android.graphics.drawable.Drawable.ConstantState
-import android.media.MediaCodec
-import android.media.MediaCodecInfo
-import android.media.MediaFormat
 import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
@@ -36,17 +31,6 @@ class ImageVid: AppCompatActivity(){
         //http://services.swpc.noaa.gov/products/animations/ovation-north.json
         val base_url = "http://services.swpc.noaa.gov"
 
-        /*val codec = MediaCodec.createEncoderByType("video/avc")
-        val format = MediaFormat.createVideoFormat("video/avc", 800, 800)
-        format.setInteger(MediaFormat.KEY_BIT_RATE, 125000)
-        format.setInteger(MediaFormat.KEY_FRAME_RATE,  15)
-        format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_Format32bitABGR8888)
-        format.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 5)
-        codec.configure(format, null, null, MediaCodec.CONFIGURE_FLAG_ENCODE)
-        codec.start()
-
-        codec.getInputBuffer(0).put(AsyncDownload().execute().get() as ByteArray)
-        */
         val ani = AnimationDrawable()
         val test = JsonDownload().execute().get()
         test.forEach { url ->  ani.addFrame(BitmapDrawable(resources, AsyncDownload().execute("$base_url$url").get()), 500)}
