@@ -3,8 +3,9 @@ package com.example.kyle.kotlintest
 import com.beust.klaxon.Parser
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.drawable.AnimationDrawable
-import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.*
+import android.graphics.drawable.DrawableContainer.DrawableContainerState
+import android.graphics.drawable.Drawable.ConstantState
 import android.media.MediaCodec
 import android.media.MediaCodecInfo
 import android.media.MediaFormat
@@ -52,6 +53,26 @@ class ImageVid: AppCompatActivity(){
 
         img.setImageDrawable(ani)
         ani.start()
+    }
+
+    inner class VideoDrawable : DrawableContainer(), Runnable, Animatable {
+
+        override fun start() {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
+
+        override fun isRunning(): Boolean {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
+
+        override fun stop() {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
+
+        override fun run() {
+            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        }
+
     }
 
     inner class AsyncDownload : AsyncTask<String, String, Bitmap>() {
