@@ -38,9 +38,10 @@ class ImageVid: AppCompatActivity(){
         ani.addFrame(BitmapDrawable(resources, AsyncDownload().execute("$base_url${test[0]}").get()), 500)
         tmp.setDrawable(BitmapDrawable(resources, AsyncDownload().execute("$base_url${test[0]}").get()))
 
+        img.setImageDrawable(tmp)
         //img.setImageDrawable(ani)
         //ani.start()
-        img.setImageDrawable(tmp)
+
     }
 
     inner class VideoDrawable : Drawable(), Drawable.Callback {
@@ -55,20 +56,53 @@ class ImageVid: AppCompatActivity(){
             mCurrDrawable.draw(p0)
         }
 
+        override fun getPadding(padding: Rect?): Boolean {
+            return mCurrDrawable.getPadding(padding)
+        }
+
         override fun setAlpha(p0: Int) {
-            mAlpha = p0
+            mCurrDrawable.mutate().alpha = p0
         }
 
         override fun getAlpha(): Int {
-            return mAlpha
+            return mCurrDrawable.alpha
         }
 
-        override fun setColorFilter(p0: ColorFilter?) {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        override fun setColorFilter(color: Int, mode: PorterDuff.Mode?) {
+            mCurrDrawable.mutate().setColorFilter(color, mode)
+        }
+
+        override fun setTint(tintColor: Int) {
+            mCurrDrawable.mutate().setTint(tintColor)
+        }
+
+        override fun onBoundsChange(bounds: Rect?) {
+            mCurrDrawable.bounds = bounds
+        }
+
+        override fun setAutoMirrored(mirrored: Boolean) {
+            mCurrDrawable.mutate().setAutoMirrored(mirrored)
+        }
+
+        override fun setVisible(visible: Boolean, restart: Boolean): Boolean {
+            return mCurrDrawable.setVisible(visible, restart)
+        }
+
+
+        override fun getIntrinsicHeight(): Int {
+            return mCurrDrawable.intrinsicHeight
+        }
+
+        override fun getIntrinsicWidth(): Int {
+            return mCurrDrawable.intrinsicWidth
+        }
+
+        override fun setColorFilter(cf: ColorFilter?) {
+            mCurrDrawable.mutate().colorFilter = cf
         }
 
         override fun getOpacity(): Int {
-            return PixelFormat.OPAQUE
+            return PixelFormat.TRANSPARENT
         }
 
         override fun invalidateDrawable(p0: Drawable?) {
@@ -88,6 +122,7 @@ class ImageVid: AppCompatActivity(){
                 callback.unscheduleDrawable(this, p1)
             }
         }
+
     }
 
     inner class AsyncDownload : AsyncTask<String, String, Bitmap>() {
