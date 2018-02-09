@@ -1,13 +1,13 @@
 package com.example.kyle.kotlintest
 
+import android.graphics.*
 import com.beust.klaxon.Parser
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.drawable.*
 import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import android.view.animation.Animation
 import android.widget.ImageView
 import com.beust.klaxon.JsonArray
 import com.beust.klaxon.JsonObject
@@ -33,30 +33,61 @@ class ImageVid: AppCompatActivity(){
 
         val ani = AnimationDrawable()
         val test = JsonDownload().execute().get()
-        test.forEach { url ->  ani.addFrame(BitmapDrawable(resources, AsyncDownload().execute("$base_url$url").get()), 500)}
+        //test.forEach { url ->  ani.addFrame(BitmapDrawable(resources, AsyncDownload().execute("$base_url$url").get()), 500)}
+        val tmp = VideoDrawable()
+        ani.addFrame(BitmapDrawable(resources, AsyncDownload().execute("$base_url${test[0]}").get()), 500)
+        tmp.setDrawable(BitmapDrawable(resources, AsyncDownload().execute("$base_url${test[0]}").get()))
 
-        img.setImageDrawable(ani)
-        ani.start()
+        //img.setImageDrawable(ani)
+        //ani.start()
+        img.setImageDrawable(tmp)
     }
 
-    inner class VideoDrawable : DrawableContainer(), Runnable, Animatable {
+    inner class VideoDrawable : Drawable(), Drawable.Callback {
+        lateinit var mCurrDrawable: Drawable
+        var mAlpha: Int = 0xFF
 
-        override fun start() {
+        fun setDrawable(draw: Drawable){
+            mCurrDrawable = draw
+        }
+
+        override fun draw(p0: Canvas?) {
+            mCurrDrawable.draw(p0)
+        }
+
+        override fun setAlpha(p0: Int) {
+            mAlpha = p0
+        }
+
+        override fun getAlpha(): Int {
+            return mAlpha
+        }
+
+        override fun setColorFilter(p0: ColorFilter?) {
             TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
         }
 
-        override fun isRunning(): Boolean {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        override fun getOpacity(): Int {
+            return PixelFormat.OPAQUE
         }
 
-        override fun stop() {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        override fun invalidateDrawable(p0: Drawable?) {
+            if(p0 == mCurrDrawable && callback != null) {
+                callback.invalidateDrawable(this)
+            }
         }
 
-        override fun run() {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        override fun scheduleDrawable(p0: Drawable?, p1: Runnable?, p2: Long) {
+            if(p0 == mCurrDrawable && callback != null){
+                callback.scheduleDrawable(this, p1, p2)
+            }
         }
 
+        override fun unscheduleDrawable(p0: Drawable?, p1: Runnable?) {
+            if(p0 == mCurrDrawable && callback != null){
+                callback.unscheduleDrawable(this, p1)
+            }
+        }
     }
 
     inner class AsyncDownload : AsyncTask<String, String, Bitmap>() {
