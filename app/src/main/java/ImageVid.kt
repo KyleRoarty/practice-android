@@ -5,6 +5,7 @@ import com.beust.klaxon.Parser
 import android.graphics.drawable.*
 import android.os.AsyncTask
 import android.os.Bundle
+import android.os.SystemClock
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.animation.Animation
@@ -44,12 +45,14 @@ class ImageVid: AppCompatActivity(){
         img.setImageDrawable(tmp)
         //img.setImageDrawable(ani)
         //ani.start()
+        tmp.start()
 
     }
 
-    inner class VideoDrawable : Drawable(), Drawable.Callback {
+    inner class VideoDrawable : Drawable(), Drawable.Callback, Animatable, Runnable {
         var mCurrDrawable: Drawable? = null
         var mBmpArray: ArrayList<ByteArray> = ArrayList<ByteArray>()
+        var mCurrIdx: Int = -1
 
         fun addImage(bmp: ByteArray){
             mBmpArray.add(bmp)
@@ -61,6 +64,44 @@ class ImageVid: AppCompatActivity(){
 
         fun setDrawable(draw: Drawable){
             mCurrDrawable = draw
+        }
+
+        fun setFrame() {
+            if (mCurrIdx+1 >= mBmpArray.size)
+                mCurrIdx = 0
+            else
+                mCurrIdx = mCurrIdx+1
+
+            val d = BitmapDrawable(resources, BitmapFactory.decodeByteArray(mBmpArray[mCurrIdx], 0, mBmpArray[mCurrIdx].size))
+            mCurrDrawable = d
+            if (d != null) {
+                d.mutate()
+                d.setVisible(isVisible(), true)
+                d.setState(getState())
+                d.setLevel(getLevel())
+                d.setBounds(getBounds())
+            }
+            scheduleSelf(this, SystemClock.uptimeMillis()+(1000/15))
+
+            invalidateSelf()
+        }
+
+        override fun run() {
+            setFrame()
+        }
+
+        override fun start() {
+            if (!isRunning)
+                run()
+        }
+
+        override fun stop() {
+            if (isRunning)
+                unscheduleSelf(this)
+        }
+
+        override fun isRunning(): Boolean {
+            return mCurrIdx > -1
         }
 
         override fun draw(p0: Canvas?) {
@@ -124,7 +165,6 @@ class ImageVid: AppCompatActivity(){
         override fun doInBackground(vararg p0: String?): ByteArray{
             val im_stream = URL(p0[0]).content
             val im_bytes: ByteArray = (im_stream as InputStream).readBytes()
-            //val bmp: Bitmap = BitmapFactory.decodeStream(im_stream as InputStream)
             (im_stream as InputStream).close()
             return im_bytes
         }
