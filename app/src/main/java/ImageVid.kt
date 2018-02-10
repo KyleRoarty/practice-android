@@ -32,11 +32,14 @@ class ImageVid: AppCompatActivity(){
         val base_url = "http://services.swpc.noaa.gov"
 
         val ani = AnimationDrawable()
+        val tmp = VideoDrawable()
         val test = JsonDownload().execute().get()
         //test.forEach { url ->  ani.addFrame(BitmapDrawable(resources, AsyncDownload().execute("$base_url$url").get()), 500)}
-        val tmp = VideoDrawable()
-        ani.addFrame(BitmapDrawable(resources, AsyncDownload().execute("$base_url${test[0]}").get()), 500)
-        tmp.setDrawable(BitmapDrawable(resources, AsyncDownload().execute("$base_url${test[0]}").get()))
+        test.forEach { url ->  tmp.addImage(AsyncDownload().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "$base_url$url").get())}
+        //ani.addFrame(BitmapDrawable(resources, AsyncDownload().execute("$base_url${test[0]}").get()), 500)
+        //tmp.setDrawable(BitmapDrawable(resources, AsyncDownload().execute("$base_url${test[0]}").get()))
+
+        //tmp.addImage(AsyncDownload().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "$base_url${test[0]}").get())
 
         img.setImageDrawable(tmp)
         //img.setImageDrawable(ani)
@@ -46,6 +49,15 @@ class ImageVid: AppCompatActivity(){
 
     inner class VideoDrawable : Drawable(), Drawable.Callback {
         var mCurrDrawable: Drawable? = null
+        var mBmpArray: ArrayList<ByteArray> = ArrayList<ByteArray>()
+
+        fun addImage(bmp: ByteArray){
+            mBmpArray.add(bmp)
+
+            if (mCurrDrawable == null){
+                mCurrDrawable = BitmapDrawable(resources, BitmapFactory.decodeByteArray(bmp, 0, bmp.size))
+            }
+        }
 
         fun setDrawable(draw: Drawable){
             mCurrDrawable = draw
@@ -108,10 +120,13 @@ class ImageVid: AppCompatActivity(){
 
     }
 
-    inner class AsyncDownload : AsyncTask<String, String, Bitmap>() {
-        override fun doInBackground(vararg p0: String?): Bitmap {
+    inner class AsyncDownload : AsyncTask<String, String, ByteArray>() {
+        override fun doInBackground(vararg p0: String?): ByteArray{
             val im_stream = URL(p0[0]).content
-            return BitmapFactory.decodeStream(im_stream as InputStream)
+            val im_bytes: ByteArray = (im_stream as InputStream).readBytes()
+            //val bmp: Bitmap = BitmapFactory.decodeStream(im_stream as InputStream)
+            (im_stream as InputStream).close()
+            return im_bytes
         }
     }
 
@@ -119,7 +134,9 @@ class ImageVid: AppCompatActivity(){
         override fun doInBackground(vararg p0: String?): ArrayList<String> {
             val urls: ArrayList<String> = arrayListOf<String>()
             val parser: Parser = Parser()
-            val json = parser.parse(URL("http://services.swpc.noaa.gov/products/animations/GOES-13-CS-PTHK-0.4.json").content as InputStream) as JsonArray<JsonObject>
+            val url: String = "http://services.swpc.noaa.gov/products/animations/ovation-north.json"
+            //val url: String = "http://services.swpc.noaa.gov/products/animations/GOES-13-CS-PTHK-0.4.json"
+            val json = parser.parse(URL(url).content as InputStream) as JsonArray<JsonObject>
 
             json.forEach{j -> urls.add(j.get("url") as String)}
             return urls
