@@ -8,8 +8,10 @@ import android.os.Bundle
 import android.os.SystemClock
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import android.view.View
 import android.view.animation.Animation
 import android.widget.ImageView
+import android.widget.ProgressBar
 import com.beust.klaxon.JsonArray
 import com.beust.klaxon.JsonObject
 import com.example.kyle.kotlintest.R
@@ -26,26 +28,21 @@ class ImageVid: AppCompatActivity(){
         findViewById<ImageView>(R.id.inetImage)
     }
 
+    val tmp by lazy{
+        VideoDrawable()
+    }
+
+    val test by lazy{
+        JsonDownload().execute().get()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.imagelayout)
         //http://services.swpc.noaa.gov/products/animations/ovation-north.json
         val base_url = "http://services.swpc.noaa.gov"
-
-        val ani = AnimationDrawable()
-        val tmp = VideoDrawable()
-        val test = JsonDownload().execute().get()
-        //test.forEach { url ->  ani.addFrame(BitmapDrawable(resources, AsyncDownload().execute("$base_url$url").get()), 500)}
-        test.forEach { url ->  tmp.addImage(AsyncDownload().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "$base_url$url").get())}
-        //ani.addFrame(BitmapDrawable(resources, AsyncDownload().execute("$base_url${test[0]}").get()), 500)
-        //tmp.setDrawable(BitmapDrawable(resources, AsyncDownload().execute("$base_url${test[0]}").get()))
-
-        //tmp.addImage(AsyncDownload().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, "$base_url${test[0]}").get())
-
-        img.setImageDrawable(tmp)
-        //img.setImageDrawable(ani)
-        //ani.start()
-        tmp.start()
+        test.forEach { url ->  AsyncDownload().execute("$base_url$url")}
+        AsyncCheck().execute()
 
     }
 
@@ -60,6 +57,10 @@ class ImageVid: AppCompatActivity(){
             if (mCurrDrawable == null){
                 mCurrDrawable = BitmapDrawable(resources, BitmapFactory.decodeByteArray(bmp, 0, bmp.size))
             }
+        }
+
+        fun size(): Int{
+            return mBmpArray.size
         }
 
         fun setDrawable(draw: Drawable){
@@ -167,6 +168,27 @@ class ImageVid: AppCompatActivity(){
             val im_bytes: ByteArray = (im_stream as InputStream).readBytes()
             (im_stream as InputStream).close()
             return im_bytes
+        }
+
+        override fun onPostExecute(result: ByteArray) {
+            super.onPostExecute(result)
+            tmp.addImage(result)
+        }
+    }
+
+    inner class AsyncCheck: AsyncTask<Void, Void, Boolean>(){
+        override fun doInBackground(vararg p0: Void?): Boolean{
+            while (test.size != tmp.size()){}
+            return test.size == tmp.size()
+        }
+
+        override fun onPostExecute(result: Boolean) {
+            super.onPostExecute(result)
+            if (result){
+                findViewById<ProgressBar>(R.id.loadingSpinny).visibility = View.GONE
+                img.setImageDrawable(tmp)
+                tmp.start()
+            }
         }
     }
 
