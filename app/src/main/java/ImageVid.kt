@@ -44,12 +44,17 @@ class ImageVid: AppCompatActivity(){
         test.forEach { url ->  AsyncDownload().execute("$base_url$url")}
         AsyncCheck().execute()
 
+        findViewById<ImageView>(R.id.inetImage).setOnClickListener({
+            _ -> if (tmp.isRunning) tmp.stop() else tmp.start()
+        })
+
     }
 
     inner class VideoDrawable : Drawable(), Drawable.Callback, Animatable, Runnable {
         var mCurrDrawable: Drawable? = null
         var mBmpArray: ArrayList<ByteArray> = ArrayList<ByteArray>()
         var mCurrIdx: Int = -1
+        var mRunning : Boolean = false
 
         fun addImage(bmp: ByteArray){
             mBmpArray.add(bmp)
@@ -77,10 +82,10 @@ class ImageVid: AppCompatActivity(){
             mCurrDrawable = d
             if (d != null) {
                 d.mutate()
-                d.setVisible(isVisible(), true)
-                d.setState(getState())
-                d.setLevel(getLevel())
-                d.setBounds(getBounds())
+                d.setVisible(isVisible, true)
+                d.state = state
+                d.level = level
+                d.bounds = bounds
             }
             scheduleSelf(this, SystemClock.uptimeMillis()+(1000/15))
 
@@ -92,17 +97,21 @@ class ImageVid: AppCompatActivity(){
         }
 
         override fun start() {
-            if (!isRunning)
+            if (!isRunning) {
+                mRunning = true
                 run()
+            }
         }
 
         override fun stop() {
-            if (isRunning)
+            if (isRunning) {
+                mRunning = false
                 unscheduleSelf(this)
+            }
         }
 
         override fun isRunning(): Boolean {
-            return mCurrIdx > -1
+            return mRunning
         }
 
         override fun draw(p0: Canvas?) {
@@ -187,7 +196,7 @@ class ImageVid: AppCompatActivity(){
             if (result){
                 findViewById<ProgressBar>(R.id.loadingSpinny).visibility = View.GONE
                 img.setImageDrawable(tmp)
-                tmp.start()
+                //tmp.start()
             }
         }
     }
