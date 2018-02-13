@@ -45,11 +45,12 @@ class ImageVid: AppCompatActivity(){
         val base_url = "http://services.swpc.noaa.gov"
         test.forEach { url ->  AsyncDownload().execute("$base_url$url")}
         AsyncCheck().execute()
-
+        DeleteFiles().execute(test)
         findViewById<ImageView>(R.id.inetImage).setOnClickListener {
             if (tmp.isRunning) tmp.stop() else tmp.start()
         }
     }
+
 
     inner class VideoDrawable : Drawable(), Drawable.Callback, Animatable, Runnable {
         var mCurrDrawable: Drawable? = null
@@ -171,6 +172,39 @@ class ImageVid: AppCompatActivity(){
 
     }
 
+    //For ovation-north only
+    inner class DeleteFiles : AsyncTask<ArrayList<String>, Void, Int>(){
+        override fun doInBackground(vararg p0: ArrayList<String>): Int {
+            val dlFileList = p0[0]
+            val path: String = "$filesDir/24hr"
+            val svFileList: Array<String> = File(path).list()
+            dlFileList.forEach { thing -> Log.d("asdf", "DL: ${thing}") }
+
+            svFileList.forEach { thing -> Log.d("asdf", "SV: ${thing.toString()}") }
+            Log.d("fdsa", "${dlFileList.first()}")
+            Log.d("fdsa", "${svFileList.first()}")
+
+            val dlSplit = dlFileList.first().split("_",".")
+            val dlDate = dlSplit[dlSplit.lastIndex - 2].toInt()
+            val dlHr = dlSplit[dlSplit.lastIndex - 1].toInt() / 100
+            val dlMin = dlSplit[dlSplit.lastIndex - 1].toInt() % 100
+
+            val svSplit = svFileList.first().split("_",".")
+            val svDate = svSplit[svSplit.lastIndex - 2].toInt()
+            val svHr = svSplit[svSplit.lastIndex - 1].toInt() / 100
+            val svMin = svSplit[svSplit.lastIndex - 1].toInt() % 100
+
+            val loopVar = ((dlHr*60 + dlMin) - (svHr*60 + svMin) + 24*60*(dlDate - svDate))/5
+
+            var loopIdx = 0
+            while (loopIdx < loopVar) {
+                File(path,svFileList[loopIdx]).delete()
+            }
+
+            return 1
+        }
+    }
+
     inner class AsyncDownload : AsyncTask<String, Void, ByteArray>() {
         private val path: String = "$filesDir/24hr"
 
@@ -221,8 +255,8 @@ class ImageVid: AppCompatActivity(){
         override fun doInBackground(vararg p0: String?): ArrayList<String> {
             val urls: ArrayList<String> = arrayListOf<String>()
             val parser: Parser = Parser()
-            //val url: String = "http://services.swpc.noaa.gov/products/animations/ovation-north.json"
-            val url: String = "http://services.swpc.noaa.gov/products/animations/GOES-13-CS-PTHK-0.4.json"
+            val url: String = "http://services.swpc.noaa.gov/products/animations/ovation-north.json"
+            //val url: String = "http://services.swpc.noaa.gov/products/animations/GOES-13-CS-PTHK-0.4.json"
             val json = parser.parse(URL(url).content as InputStream) as JsonArray<JsonObject>
 
             json.forEach{j -> urls.add(j.get("url") as String)}
