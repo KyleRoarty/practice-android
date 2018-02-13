@@ -1,5 +1,6 @@
 package com.example.kyle.kotlintest
 
+import android.content.Context
 import android.graphics.*
 import com.beust.klaxon.Parser
 import android.graphics.drawable.*
@@ -17,6 +18,7 @@ import com.beust.klaxon.JsonObject
 import com.example.kyle.kotlintest.R
 import org.json.JSONArray
 import org.json.JSONObject
+import java.io.File
 import java.io.InputStream
 import java.net.URL
 
@@ -44,10 +46,9 @@ class ImageVid: AppCompatActivity(){
         test.forEach { url ->  AsyncDownload().execute("$base_url$url")}
         AsyncCheck().execute()
 
-        findViewById<ImageView>(R.id.inetImage).setOnClickListener({
-            _ -> if (tmp.isRunning) tmp.stop() else tmp.start()
-        })
-
+        findViewById<ImageView>(R.id.inetImage).setOnClickListener {
+            if (tmp.isRunning) tmp.stop() else tmp.start()
+        }
     }
 
     inner class VideoDrawable : Drawable(), Drawable.Callback, Animatable, Runnable {
@@ -80,13 +81,12 @@ class ImageVid: AppCompatActivity(){
 
             val d = BitmapDrawable(resources, BitmapFactory.decodeByteArray(mBmpArray[mCurrIdx], 0, mBmpArray[mCurrIdx].size))
             mCurrDrawable = d
-            if (d != null) {
-                d.mutate()
-                d.setVisible(isVisible, true)
-                d.state = state
-                d.level = level
-                d.bounds = bounds
-            }
+            d.mutate()
+            d.setVisible(isVisible, true)
+            d.state = state
+            d.level = level
+            d.bounds = bounds
+
             scheduleSelf(this, SystemClock.uptimeMillis()+(1000/15))
 
             invalidateSelf()
@@ -171,17 +171,33 @@ class ImageVid: AppCompatActivity(){
 
     }
 
-    inner class AsyncDownload : AsyncTask<String, String, ByteArray>() {
-        override fun doInBackground(vararg p0: String?): ByteArray{
-            val im_stream = URL(p0[0]).content
-            val im_bytes: ByteArray = (im_stream as InputStream).readBytes()
-            (im_stream as InputStream).close()
-            return im_bytes
+    inner class AsyncDownload : AsyncTask<String, Void, ByteArray>() {
+        private val path: String = "$filesDir/24hr"
+
+        override fun doInBackground(vararg p0: String): ByteArray{
+            val f_name = p0[0].split('/').last()
+            if (!File(path,f_name).exists()) {
+                val im_stream = URL(p0[0]).content
+                val im_bytes: ByteArray = (im_stream as InputStream).readBytes()
+                (im_stream as InputStream).close()
+                saveBytes(im_bytes, f_name)
+                return im_bytes
+            } else {
+                return File(path,f_name).readBytes()
+            }
         }
 
         override fun onPostExecute(result: ByteArray) {
             super.onPostExecute(result)
             tmp.addImage(result)
+        }
+
+        private fun saveBytes (imgBytes: ByteArray, imgName: String) {
+            val f = File(path,imgName)
+            Log.d("asdf", "${f.absolutePath},\n${f.name},\n${f.path},\n${f.parentFile},\n${f.exists()}")
+            if (f.exists()) return
+            f.parentFile.mkdir()
+            f.writeBytes(imgBytes)
         }
     }
 
@@ -205,8 +221,8 @@ class ImageVid: AppCompatActivity(){
         override fun doInBackground(vararg p0: String?): ArrayList<String> {
             val urls: ArrayList<String> = arrayListOf<String>()
             val parser: Parser = Parser()
-            val url: String = "http://services.swpc.noaa.gov/products/animations/ovation-north.json"
-            //val url: String = "http://services.swpc.noaa.gov/products/animations/GOES-13-CS-PTHK-0.4.json"
+            //val url: String = "http://services.swpc.noaa.gov/products/animations/ovation-north.json"
+            val url: String = "http://services.swpc.noaa.gov/products/animations/GOES-13-CS-PTHK-0.4.json"
             val json = parser.parse(URL(url).content as InputStream) as JsonArray<JsonObject>
 
             json.forEach{j -> urls.add(j.get("url") as String)}
