@@ -45,7 +45,8 @@ class ImageVid: AppCompatActivity(){
         val base_url = "http://services.swpc.noaa.gov"
         test.forEach { url ->  AsyncDownload().execute("$base_url$url")}
         AsyncCheck().execute()
-        DeleteFiles().execute(test)
+        val testArray1: Array<String> = test.toTypedArray()
+        DeleteFiles().execute(testArray1)
         findViewById<ImageView>(R.id.inetImage).setOnClickListener {
             if (tmp.isRunning) tmp.stop() else tmp.start()
         }
@@ -88,7 +89,7 @@ class ImageVid: AppCompatActivity(){
             d.level = level
             d.bounds = bounds
 
-            scheduleSelf(this, SystemClock.uptimeMillis()+(1000/15))
+            scheduleSelf(this, SystemClock.uptimeMillis()+(1000/10))
 
             invalidateSelf()
         }
@@ -173,32 +174,33 @@ class ImageVid: AppCompatActivity(){
     }
 
     //For ovation-north only
-    inner class DeleteFiles : AsyncTask<ArrayList<String>, Void, Int>(){
-        override fun doInBackground(vararg p0: ArrayList<String>): Int {
-            val dlFileList = p0[0]
+    inner class DeleteFiles : AsyncTask<Array<String>, Void, Int>(){
+        //Returns date as int, Time in mins
+        private fun getDateTime(file: String): Pair<Int, Int> {
+            val fiSplit = file.split("_",".")
+            val fiHr = fiSplit[fiSplit.lastIndex - 1].toInt() / 100
+            val fiMn = fiSplit[fiSplit.lastIndex - 1].toInt() % 100
+
+            return Pair(fiSplit[fiSplit.lastIndex - 2].toInt(), fiHr*60+fiMn)
+        }
+
+        override fun doInBackground(vararg p0: Array<String>): Int {
+            val dlFL: Array<String> = p0.get(0)
+            val dlFileList : Array<String> = dlFL.sortedArray()
+            val dlFirst = getDateTime(dlFileList.first())
+
             val path: String = "$filesDir/24hr"
-            val svFileList: Array<String> = File(path).list()
-            dlFileList.forEach { thing -> Log.d("asdf", "DL: ${thing}") }
-
-            svFileList.forEach { thing -> Log.d("asdf", "SV: ${thing.toString()}") }
-            Log.d("fdsa", "${dlFileList.first()}")
-            Log.d("fdsa", "${svFileList.first()}")
-
-            val dlSplit = dlFileList.first().split("_",".")
-            val dlDate = dlSplit[dlSplit.lastIndex - 2].toInt()
-            val dlHr = dlSplit[dlSplit.lastIndex - 1].toInt() / 100
-            val dlMin = dlSplit[dlSplit.lastIndex - 1].toInt() % 100
-
-            val svSplit = svFileList.first().split("_",".")
-            val svDate = svSplit[svSplit.lastIndex - 2].toInt()
-            val svHr = svSplit[svSplit.lastIndex - 1].toInt() / 100
-            val svMin = svSplit[svSplit.lastIndex - 1].toInt() % 100
-
-            val loopVar = ((dlHr*60 + dlMin) - (svHr*60 + svMin) + 24*60*(dlDate - svDate))/5
+            val svFL: Array<String> = File(path).list()
+            val svFileList: Array<String> = svFL.sortedArray()
 
             var loopIdx = 0
-            while (loopIdx < loopVar) {
+            while (true) {
+                val cmpFile = getDateTime(svFileList[loopIdx])
+                if (24*60*(dlFirst.first - cmpFile.first) + dlFirst.second - cmpFile.second <= 0){
+                    break
+                }
                 File(path,svFileList[loopIdx]).delete()
+                loopIdx += 1
             }
 
             return 1
@@ -228,7 +230,7 @@ class ImageVid: AppCompatActivity(){
 
         private fun saveBytes (imgBytes: ByteArray, imgName: String) {
             val f = File(path,imgName)
-            Log.d("asdf", "${f.absolutePath},\n${f.name},\n${f.path},\n${f.parentFile},\n${f.exists()}")
+            //Log.d("asdf", "${f.absolutePath},\n${f.name},\n${f.path},\n${f.parentFile},\n${f.exists()}")
             if (f.exists()) return
             f.parentFile.mkdir()
             f.writeBytes(imgBytes)
