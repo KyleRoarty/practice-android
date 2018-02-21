@@ -26,6 +26,8 @@ import java.net.URL
  * Created by Kyle on 2/2/2018.
  */
 class ImageVid: AppCompatActivity(){
+    var play: Boolean = false
+
     val img by lazy{
         findViewById<ImageView>(R.id.inetImage)
     }
@@ -49,15 +51,26 @@ class ImageVid: AppCompatActivity(){
         DeleteFiles().execute(testArray1)
         findViewById<ImageView>(R.id.inetImage).setOnClickListener {
             if (tmp.isRunning) tmp.stop() else tmp.start()
+            play = !play
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (play) tmp.start()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        if (tmp.isRunning) tmp.stop()
+    }
 
     inner class VideoDrawable : Drawable(), Drawable.Callback, Animatable, Runnable {
         var mCurrDrawable: Drawable? = null
         var mBmpArray: ArrayList<ByteArray> = ArrayList<ByteArray>()
         var mCurrIdx: Int = -1
         var mRunning : Boolean = false
+        var frameRate: Int = 10
 
         fun addImage(bmp: ByteArray){
             mBmpArray.add(bmp)
@@ -89,7 +102,7 @@ class ImageVid: AppCompatActivity(){
             d.level = level
             d.bounds = bounds
 
-            scheduleSelf(this, SystemClock.uptimeMillis()+(1000/10))
+            scheduleSelf(this, SystemClock.uptimeMillis()+(1000/frameRate))
 
             invalidateSelf()
         }
