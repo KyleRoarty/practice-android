@@ -21,6 +21,7 @@ import org.json.JSONObject
 import java.io.File
 import java.io.InputStream
 import java.net.URL
+import com.example.imgtovid.VideoDrawable
 
 /**
  * Created by Kyle on 2/2/2018.
@@ -33,7 +34,7 @@ class ImageVid: AppCompatActivity(){
     }
 
     val tmp by lazy{
-        VideoDrawable()
+        VideoDrawable(resources)
     }
 
     val test by lazy{
@@ -65,126 +66,7 @@ class ImageVid: AppCompatActivity(){
         if (tmp.isRunning) tmp.stop()
     }
 
-    inner class VideoDrawable : Drawable(), Drawable.Callback, Animatable, Runnable {
-        var mCurrDrawable: Drawable? = null
-        var mBmpArray: ArrayList<ByteArray> = ArrayList<ByteArray>()
-        var mCurrIdx: Int = -1
-        var mRunning : Boolean = false
-        var frameRate: Int = 10
 
-        fun addImage(bmp: ByteArray){
-            mBmpArray.add(bmp)
-
-            if (mCurrDrawable == null){
-                mCurrDrawable = BitmapDrawable(resources, BitmapFactory.decodeByteArray(bmp, 0, bmp.size))
-            }
-        }
-
-        fun size(): Int{
-            return mBmpArray.size
-        }
-
-        fun setDrawable(draw: Drawable){
-            mCurrDrawable = draw
-        }
-
-        fun setFrame() {
-            if (mCurrIdx+1 >= mBmpArray.size)
-                mCurrIdx = 0
-            else
-                mCurrIdx = mCurrIdx+1
-
-            val d = BitmapDrawable(resources, BitmapFactory.decodeByteArray(mBmpArray[mCurrIdx], 0, mBmpArray[mCurrIdx].size))
-            mCurrDrawable = d
-            d.mutate()
-            d.setVisible(isVisible, true)
-            d.state = state
-            d.level = level
-            d.bounds = bounds
-
-            scheduleSelf(this, SystemClock.uptimeMillis()+(1000/frameRate))
-
-            invalidateSelf()
-        }
-
-        override fun run() {
-            setFrame()
-        }
-
-        override fun start() {
-            if (!isRunning) {
-                mRunning = true
-                run()
-            }
-        }
-
-        override fun stop() {
-            if (isRunning) {
-                mRunning = false
-                unscheduleSelf(this)
-            }
-        }
-
-        override fun isRunning(): Boolean {
-            return mRunning
-        }
-
-        override fun draw(p0: Canvas?) {
-            mCurrDrawable?.draw(p0)
-        }
-
-        override fun getPadding(padding: Rect?): Boolean {
-            return mCurrDrawable?.getPadding(padding) ?: super.getPadding(padding)
-        }
-
-        override fun setAlpha(alpha: Int) {
-            mCurrDrawable?.mutate()?.alpha = alpha
-        }
-
-        override fun getAlpha(): Int {
-            return mCurrDrawable?.alpha ?: 0xFF
-        }
-
-        override fun setColorFilter(cf: ColorFilter?) {
-            mCurrDrawable?.mutate()?.colorFilter = cf
-        }
-
-        override fun onBoundsChange(bounds: Rect?) {
-            mCurrDrawable?.bounds = bounds
-        }
-
-        override fun getOpacity(): Int {
-            //Dunno what this does
-            return PixelFormat.TRANSPARENT
-        }
-
-        override fun getIntrinsicHeight(): Int {
-            return mCurrDrawable?.intrinsicHeight ?: -1
-        }
-
-        override fun getIntrinsicWidth(): Int {
-            return mCurrDrawable?.intrinsicWidth ?: -1
-        }
-
-        override fun invalidateDrawable(p0: Drawable?) {
-            if(p0 == mCurrDrawable && callback != null) {
-                callback.invalidateDrawable(this)
-            }
-        }
-
-        override fun scheduleDrawable(p0: Drawable?, p1: Runnable?, p2: Long) {
-            if(p0 == mCurrDrawable && callback != null){
-                callback.scheduleDrawable(this, p1, p2)
-            }
-        }
-
-        override fun unscheduleDrawable(p0: Drawable?, p1: Runnable?) {
-            if(p0 == mCurrDrawable && callback != null){
-                callback.unscheduleDrawable(this, p1)
-            }
-        }
-
-    }
 
     //For ovation-north only
     inner class DeleteFiles : AsyncTask<Array<String>, Void, Int>(){
@@ -228,7 +110,7 @@ class ImageVid: AppCompatActivity(){
             if (!File(path,f_name).exists()) {
                 val im_stream = URL(p0[0]).content
                 val im_bytes: ByteArray = (im_stream as InputStream).readBytes()
-                (im_stream as InputStream).close()
+                im_stream.close()
                 saveBytes(im_bytes, f_name)
                 return im_bytes
             } else {
@@ -272,6 +154,7 @@ class ImageVid: AppCompatActivity(){
             val parser: Parser = Parser()
             val url: String = "http://services.swpc.noaa.gov/products/animations/ovation-north.json"
             //val url: String = "http://services.swpc.noaa.gov/products/animations/GOES-13-CS-PTHK-0.4.json"
+            @Suppress("UNCHECKED_CAST")
             val json = parser.parse(URL(url).content as InputStream) as JsonArray<JsonObject>
 
             json.forEach{j -> urls.add(j.get("url") as String)}
